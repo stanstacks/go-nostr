@@ -133,7 +133,7 @@ func (r *Relay) ConnectContext(ctx context.Context) error {
 				if subscription, ok := r.subscriptions.Load(channel); ok {
 					var event Event
 					json.Unmarshal(jsonMessage[2], &event)
-
+					fmt.Printf("relay.go:136\n%s\n", event.ID)
 					// check signature of all received events, ignore invalid
 					ok, err := event.CheckSignature()
 					if !ok {
@@ -147,10 +147,12 @@ func (r *Relay) ConnectContext(ctx context.Context) error {
 
 					// check if the event matches the desired filter, ignore otherwise
 					if !subscription.Filters.Match(&event) {
+						fmt.Printf("relay.go:150\n%s\n", event.ID)
 						continue
 					}
 
 					if !subscription.stopped {
+						fmt.Printf("relay.go:155\n%s\n", event.ID)
 						subscription.Events <- event
 					}
 				}
@@ -245,10 +247,13 @@ func (r *Relay) QuerySync(filter Filter, timeout time.Duration) []Event {
 	for {
 		select {
 		case evt := <-sub.Events:
+			fmt.Println(250)
 			events = append(events, evt)
 		case <-sub.EndOfStoredEvents:
+			fmt.Println(253)
 			return events
 		case <-time.After(timeout):
+			fmt.Println(256)
 			return events
 		}
 	}
